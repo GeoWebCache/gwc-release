@@ -19,14 +19,14 @@
 # Dependencies: GeoWebCache Build tools (Maven, Git, Java), make, Sphinx, Ruby, ruby-git, ruby-ssh, ruby-scp, xsddoc
 #
 # Install Ruby dependencies:
-#   gem install git net-ssh net-scp
+#   gem install bundle
+#   bundle install
 # 
 # xsddoc:
 #   <http://sourceforge.net/projects/xframe/files/xsddoc/>
 #   Run 'dos2unix xsddoc' after downloading it if using a POSIX OS.  Place on the path or specifiy the location with --xsddoc-bin
 #
    
-require 'rubygems'
 require 'git'
 require 'fileutils'
 require 'logger'
