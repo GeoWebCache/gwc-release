@@ -36,6 +36,7 @@ require 'net/ssh'
 require 'net/scp'
 require 'optparse'
 require 'date'
+require 'yaml'
 
 $log = Logger.new($stdout)
 $log.level = Logger::INFO
@@ -190,29 +191,29 @@ def branch(new_version, new_gt_version, new_branch, old_branch, upstream_remote)
 end
 
 def edit(file)
-  editor = ENV["EDITOR"]
-  system(editor, file)
+  raise "No editor set" if $options[:editor_bin].nil? or $options[:editor].empty?
+  system($options[:editor_bin], file)
 end
 
 def make(*params)
   args = [$options[:make_bin], "-C","#{File.join($dir,"documentation","en", "user")}", *params]
   $log.info args.join " "
   result = system(*args)
-  throw "Make failed" unless result
+  raise "Make failed" unless result
 end
 
 def maven(*params)
   args = [$options[:maven_bin], "-f", "#{File.join($dir,"geowebcache","pom.xml")}", *params]
   $log.info args.join " "
   result = system(*args)
-  throw "Maven build failed" unless result
+  raise "Maven build failed" unless result
 end
 
 def xsddoc(*params)
   args = [$options[:xsddoc_bin], *params]
   $log.info args.join " "
   result = system(*args)
-  throw "xsddoc build failed" unless result
+  raise "xsddoc build failed" unless result
 end
 
 def update_for_release(long_version, short_version, gt_version, branch, upstream_remote)
@@ -451,7 +452,7 @@ $branch = nil
 $old_branch = nil
 $newbranch = nil
 
-$options = {}
+$cl_options = {}
 
 LEVELS = {:fatal => Logger::FATAL, :error => Logger::ERROR, :warn => Logger::WARN, :info => Logger::INFO, :debug => Logger::DEBUG}
 
@@ -472,7 +473,11 @@ OptionParser.new do |opts|
   opts.separator "Options:"
   opts.on("--type [TYPE]", RELEASE_TYPES,
           "The type of release being made (#{RELEASE_TYPES.join ", "})") do |type|
-    $options[:type] = type
+    $cl_options[:type] = type
+  end
+  opts.on("--user-defaults [DEFAULTS FILE]",
+          "A yaml file containing default values for configuration") do |type|
+    $cl_options[:user_defaults] = type
   end
 
   
@@ -480,66 +485,70 @@ OptionParser.new do |opts|
   opts.separator "Deployment Login Credentials:"
   opts.separator "   Credentials for deploying to the maven repository are assumed to be in settings.xml.  Git is assumed to have credentials to push to the GWC GitHub repository."
   opts.on("--sf-user [USERNAME]", "SourceForge username.  Required for deploy.") do |uname|
-    $options[:sf_user] = uname
+    $cl_options[:sf_user] = uname
   end
   opts.on("--sf-password [PASSWORD]", "SourceForge password.") do |pass|
-    $options[:sf_password] = pass
+    $cl_options[:sf_password] = pass
   end
   opts.on("--web-user [USERNAME]", "Web site username. Required for web deploy.") do |uname|
-    $options[:web_user] = uname
+    $cl_options[:web_user] = uname
   end
   opts.on("--web-password [PASSWORD]", "Web site password.") do |pass|
-    $options[:web_password] = pass
+    $cl_options[:web_password] = pass
   end
 
   opts.separator ""
   opts.separator "Executables:"
   opts.on("--maven-bin [PATH]", "Path of the maven executable") do |path|
     raise "#{path} is not an executable" unless File.executable? path
-    $options[:maven_bin] = path
+    $cl_options[:maven_bin] = path
   end
   opts.on("--make-bin [PATH]", "Path of the make executable") do |path|
     raise "#{path} is not an executable" unless File.executable? path
-    $options[:make_bin] = path
+    $cl_options[:make_bin] = path
   end
   opts.on("--xsddoc-bin [PATH]", "Path of the xsddoc executable") do |path|
     raise "#{path} is not an executable" unless File.executable? path
-    $options[:xsddoc_bin] = path
+    $cl_options[:xsddoc_bin] = path
+  end
+  opts.on("--editor-bin [PATH]", "Path of the text editor to use to edit the release notes") do |path|
+    raise "#{path} is not an executable" unless File.executable? path
+    $cl_options[:editor_bin] = path
   end
 
   opts.separator ""
   opts.separator "Version Numbers:"
   opts.on("-l", "--long-version [VERSION]", "Full version number (ie: 1.7.3, 1.8-beta, 1.9-SNAPSHOT)") do |version|
-    $options[:long_version] = version
+    $cl_options[:long_version] = version
   end
   opts.on("-s", "--short-version [VERSION]", "Major and minor versions only (ie: 1.7, 1.9)") do |version|
-    $options[:short_version] = version
+    $cl_options[:short_version] = version
   end
   opts.on("-g", "--gt-version [VERSION]", "GeoTools version (ie: 14.0, 15-SNAPSHOT)") do |version|
-    $options[:gt_version] = version
+    $cl_options[:gt_version] = version
   end
 
   opts.separator ""
   opts.separator "Git:"
   opts.on("--new-branch [BRANCH]", "Branch to create.") do |branch|
-    $options[:new_branch] = branch
+    $cl_options[:new_branch] = branch
   end
   opts.on("--old-branch [BRANCH]", "Branch to fork from.") do |branch|
-    $options[:old_branch] = branch
+    $cl_options[:old_branch] = branch
   end
   opts.on("--branch [BRANCH]", "Branch to build from.") do |branch|
-    $options[:branch] = branch
+    $cl_options[:branch] = branch
   end
   opts.on("-d", "--directory DIRECTORY",
           "The root of the GeoWebCache source repository") do |dir|
     raise "#{dir} is not a directory" unless File.directory? dir
-    $options[:dir] = dir
+    $cl_options[:dir] = dir
   end
   opts.on("--upstream [REMOTE]", "The git remote for the official GeoWebCache repository") do |remote|
-    $options[:upstream_remote] = remote
+    $cl_options[:upstream_remote] = remote
   end
   opts.on("--release-commit [COMMIT]", "The commit to tag and roll back in the tag command.  Set automatically by the update command.") do |commit|
-    $options[:release_commit] = commit
+    $cl_options[:release_commit] = commit
   end
 
   opts.separator "Logging"
@@ -560,8 +569,23 @@ $default_options = {
   :upstream_remote => "origin",
   :xsddoc_bin => "xsddoc",
   :maven_bin => "mvn",
-  :make_bin => "make" 
+  :make_bin => "make", 
+  :editor_bin => ENV["EDITOR"]
 }
+
+user_defaults = if($cl_options[:user_defaults].nil?)
+  begin
+    YAML.load_file "user_defaults.yml"
+  rescue Errno::ENOENT
+    {}
+  end
+else
+  YAML.load_file $cl_options[:user_defaults]
+end.inject({}) do |hash, (k,v)|
+  hash[k.to_sym] = v; 
+  hash
+end
+
 
 def require_options(options, required_options)
   $log.debug "requiring #{options.inspect} includes #{required_options.inspect}"
@@ -571,7 +595,9 @@ def require_options(options, required_options)
   raise "Missing options: #{missing.map{|option| "--#{option.to_s.gsub /_/, "-"}"}.join ', '}" unless missing.empty?
 end
 
-$options = $default_options.merge($options)
+$options = $default_options.merge(user_defaults).merge($cl_options)
+
+p $options
 
 $dir = $options[:dir]
 $git = Git.open($options[:dir], :log => $git_log)
