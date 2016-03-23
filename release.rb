@@ -321,7 +321,7 @@ def deploy_release(long_version, type=:stable, sf_user, sf_password)
   $log.info "Deploying artifacts"
 
   $log.info "Deploying to maven repository"
-  maven "deploy"
+  maven "deploy", "-DskipTests" # Tests ran while building, don't run them again
   
   $log.info "Deploying artifacts to Sourceforge"
 
