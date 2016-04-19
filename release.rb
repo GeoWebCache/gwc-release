@@ -191,7 +191,7 @@ def branch(new_version, new_gt_version, new_branch, old_branch, upstream_remote)
 end
 
 def edit(file)
-  raise "No editor set" if $options[:editor_bin].nil? or $options[:editor].empty?
+  raise "No editor set" if $options[:editor_bin].nil? or $options[:editor_bin].empty?
   system($options[:editor_bin], file)
 end
 
@@ -597,7 +597,7 @@ end
 
 $options = $default_options.merge(user_defaults).merge($cl_options)
 
-p $options
+$log.info "Running with options: #{$options.inspect}"
 
 $dir = $options[:dir]
 $git = Git.open($options[:dir], :log => $git_log)
