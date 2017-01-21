@@ -39,8 +39,18 @@ Assuming one wants to release a GWC 1.9.3, which depends on GeoToools 15.4, then
 ````
 ruby release.rb --branch 1.9.x --long-version 1.9.3 --short-version 1.9 --gt-version 15.4 --type stable reset update 
 ruby release.rb --branch 1.9.x --long-version 1.9.3 --short-version 1.9 --gt-version 15.4 --type stable build
-ruby release.rb --branch 1.9.x --long-version 1.9.3 --short-version 1.9 --gt-version 15.4 --type stable --sf-user <theUser> --sf-password <thePassword> deploy
+ruby release.rb --branch 1.9.x --long-version 1.9.3 --short-version 1.9 --gt-version 15.4 --type stable --sf-user <theUser> deploy
+ruby release.rb --branch 1.9.x --long-version 1.9.3 --short-version 1.9 --gt-version 15.4 --type stable --release-commit <versionCommitId> tag
 ````
+
+where ``versionCommitId`` is the commit automatically created by the update command, that switched all the pom files to release 1.9.3 (that needs to be tagged, and then reverted for the 1.9.x branch).
+
+As an optional command for those having access to the server running geowebcache.org, the web site can be updated using:
+
+````
+ruby release.rb --branch 1.9.x --long-version 1.9.3 --short-version 1.9 --gt-version 15.4 --type stable --web-user <serverUserName> web
+```` 
+
 
 Creating a new branch
 ---------------------
