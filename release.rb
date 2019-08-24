@@ -6,7 +6,7 @@
 # Examples:
 #
 # release.rb --branch 1.8.x reset # Reset the local 1.8.x branch to match origin/1.8.x
-# release.rb --new-branch 1.8.x --old-branch master --long-version 1.9 --short-version 1.9 --gt-version 15-SNAPSHOT branch # Create a 1.8.x branch off of master and update the build config on master to version 1.9.  Commits but does not push the changes.  Also allows the user to edit the release notes and then commits that seperately.
+# release.rb --new-branch 1.8.x --old-branch master --long-version 1.9 --short-version 1.9 --gt-version 15 branch # Create a 1.8.x branch off of master and update the build config on master to version 1.9.  Commits but does not push the changes.  Also allows the user to edit the release notes and then commits that seperately.
 # release.rb --branch 1.8.x --long-version 1.8-RC1 --short-version 1.8 --gt-version 14-RC1 --type candidate update # update build config to release Release Candidate 1 of the 1.8 series
 # release.rb --branch master --long-version 1.8-beta --type beta # Release beta for the 1.8 series
 # release.rb --branch 1.8.x --long-version 1.8.0 --short-version 1.8 --gt-version 14.0 --type stable reset update build # sync to origin/1.8.x, update for a atable 1.8.0 release, then build it
