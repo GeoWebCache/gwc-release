@@ -55,4 +55,13 @@ ruby release.rb --branch 1.9.x --long-version 1.9.3 --short-version 1.9 --gt-ver
 Creating a new branch
 ---------------------
 
-TBD, check the commends in the header of release.rb
+Same as above, but with these instructions:
+
+````
+ruby release.rb --branch master reset
+ruby release.rb --new-branch 1.15.x --old-branch master --long-version 1.15-SNAPSHOT --short-version 1.15 --gt-version 22-SNAPSHOT branch
+ruby release.rb --branch 1.15.x --long-version 1.15-RC --short-version 1.15 --gt-version 21-RC --type candidate update
+ruby release.rb --branch 1.15.x --long-version 1.15-RC --short-version 1.15 --gt-version 21-RC --type candidate build
+ruby release.rb --branch 1.15.x --long-version 1.15-RC --short-version 1.15 --gt-version 21-RC --type candidate --sf-user aaime deploy
+ruby release.rb --branch 1.15.x --long-version 1.15-RC --release-commit 56389371f6d92b5493100b1c519f05a5037bc1b0 tag
+````
