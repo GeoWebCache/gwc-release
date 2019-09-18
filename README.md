@@ -17,19 +17,25 @@ gem install bundle
 bundle install
 ````
    
+Before starting a release
+-------------------------
+
 If running on a non Windows platform after installing xssdoc:
 
 ````
 dos2unix xsddoc
 ````
 
-Finally, copy the ``release.rb`` in the root of your GeoWebCache installation and make sure the "EDITOR" variable is set, e.g.
+Copy the ``release.rb`` in the root of your GeoWebCache installation and make sure the "EDITOR" variable is set, e.g.
 
 ````
 echo $EDITOR
 # if empty then
 export EDITOR=vi
 ````
+
+Also make sure xsddoc in in the path.
+
 
 Releasing a stable release
 --------------------------
