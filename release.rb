@@ -81,9 +81,13 @@ def process_file(path, start=nil, stop=nil, backup=nil)
 end
 
 def update_poms(gwc_version, gt_version)
+  gwc_major = gwc_version.scan(/\d*/)[0]
+  gwc_minor = gwc_version.scan(/\d*/)[2]
+  
   Dir.glob (File.join($dir, "geowebcache","**","pom.xml")) do |path| 
     process_file path do |line|
-      line.sub! /<version>[^<]*<\/version><!-- GWC VERSION -->/, "<version>#{gwc_version}</version><!-- GWC VERSION -->"
+      # line.sub! "<version>1.18-SNAPSHOT</version>", "<version>#{gwc_version}</version>"
+      line.sub! "<version>#{gwc_major}.#{gwc_minor}-SNAPSHOT</version>", "<version>#{gwc_version}</version>"
       line.sub! /<gt.version>[^<]*<\/gt.version>/, "<gt.version>#{gt_version}</gt.version>"
       line.sub! /<finalName>geowebcache-[^<]*<\/finalName>/, "<finalName>geowebcache-#{gwc_version}</finalName>"
       line
