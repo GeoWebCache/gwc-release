@@ -1,4 +1,4 @@
-This ruby script allows to automate the release of GeoWebCache.
+This ruby script automates the release of GeoWebCache.
 
 Installation
 ------------
@@ -20,7 +20,7 @@ bundle install
 Before starting a release
 -------------------------
 
-If running on a non Windows platform after installing xssdoc:
+If running on a non-Windows platform after installing xssdoc:
 
 ````
 dos2unix xsddoc
@@ -40,7 +40,7 @@ Also make sure xsddoc in in the path.
 Releasing a stable release
 --------------------------
 
-Assuming one wants to release a GWC 1.9.3, which depends on GeoToools 15.4, then run the following commands:
+Assuming one wants to release a GWC 1.9.3, which depends on GeoTools 15.4, then run the following commands:
 
 ````
 ruby release.rb --branch 1.9.x --long-version 1.9.3 --short-version 1.9 --gt-version 15.4 --type stable reset update 
