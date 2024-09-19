@@ -83,6 +83,9 @@ end
 def update_poms(gwc_version, gt_version)
   gwc_major = gwc_version.scan(/\d*/)[0]
   gwc_minor = gwc_version.scan(/\d*/)[2]
+  gwc_minor_previous = (gwc_minor.to_i - 1).to_s
+  
+  puts "Update from: #{gwc_major}.#{gwc_minor_previous}-SNAPSHOT or #{gwc_major}.#{gwc_minor}-SNAPSHOT to #{gwc_version}"
   
   Dir.glob (File.join($dir, "geowebcache","**","pom.xml")) do |path| 
     process_file path do |line|
