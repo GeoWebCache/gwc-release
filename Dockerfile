@@ -62,7 +62,8 @@ RUN cd /root/gwc-release && bundle install
 COPY setup_git.sh /usr/local/bin/setup_git.sh
 
 # Make the script executable
-RUN chmod +x /usr/local/bin/setup_git.sh
+RUN dos2unix /usr/local/bin/setup_git.sh && \
+	chmod +x /usr/local/bin/setup_git.sh
 
 # Set the script as the entrypoint
 ENTRYPOINT ["/usr/local/bin/setup_git.sh"]
