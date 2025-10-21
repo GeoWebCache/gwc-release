@@ -90,6 +90,7 @@ def update_poms(gwc_version, gt_version)
   Dir.glob (File.join($dir, "geowebcache","**","pom.xml")) do |path| 
     process_file path do |line|
       # line.sub! "<version>1.18-SNAPSHOT</version>", "<version>#{gwc_version}</version>"
+      line.sub! "<version>#{gwc_major}.#{gwc_minor_previous}-SNAPSHOT</version>", "<version>#{gwc_version}</version>"
       line.sub! "<version>#{gwc_major}.#{gwc_minor}-SNAPSHOT</version>", "<version>#{gwc_version}</version>"
       line.sub! /<gt.version>[^<]*<\/gt.version>/, "<gt.version>#{gt_version}</gt.version>"
       line.sub! /<finalName>geowebcache-[^<]*<\/finalName>/, "<finalName>geowebcache-#{gwc_version}</finalName>"
@@ -324,19 +325,23 @@ end
 FRS_HOST = "frs.sourceforge.net"
 FRS_SSH_PORT = 22
 
-def deploy_release(long_version, type=:stable, sf_user, sf_password)
+def deploy_release(long_version, type=:stable)
   $log.info "Deploying artifacts"
 
   $log.info "Deploying to maven repository"
   maven "deploy", "-DskipTests" # Tests ran while building, don't run them again
   
-  $log.info "Deploying artifacts to Sourceforge"
+  $log.info "Done deploying artifacts" 
+end
+
+def upload_release(long_version, type=:stable, sf_user, sf_password)
+    $log.info "Uploading artifacts to Sourceforge"
 
   Net::SSH.start(FRS_HOST, sf_user, {:port => FRS_SSH_PORT, :logger => $ssh_log, :password => sf_password}) do |ssh|
     ssh.scp.upload! $artifact_dir, "/home/frs/project/geowebcache/geowebcache/#{long_version}", {:recursive => true}
   end
 
-  $log.info "Done deploying artifacts" 
+  $log.info "Done uploading artifacts" 
 end
 
 WEB_HOST = "wedge.boundlessgeo.com"
@@ -472,7 +477,8 @@ OptionParser.new do |opts|
   opts.separator "        branch                       Create a new branch and update the version numbers on the old one.  Pushes updates to GitHub."
   opts.separator "        update                       Update the versions for release."  
   opts.separator "        build                        Build the release artifacts."
-  opts.separator "        deploy                       Upload to Maven and SourceForge"
+  opts.separator "        deploy                       Deploy to Maven"
+  opts.separator "        upload                       Upload to SourceForge"
   opts.separator "        tag                          Tag the release and revert to SNAPSHOT versions.  Pushes updates to GitHub."
   opts.separator "        web                          Update the geowebcache.org website"
   opts.separator ""
@@ -650,11 +656,17 @@ ARGV.each do |command|
     build_release(*params)
 
   when "deploy" # Deploy artifacts
-    require_options($options, [:long_version, :branch, :sf_user])
-    params =                  [:long_version, :branch, :sf_user, :sf_password].map{|key| $options[key]}
+    require_options($options, [:long_version, :branch])
+    params =                  [:long_version, :branch].map{|key| $options[key]}
     puts "deploy_release(#{params.map{|param| param.inspect}.join","})"
     deploy_release(*params)
 
+  when "upload" # Deploy artifacts
+    require_options($options, [:long_version, :branch, :sf_user])
+    params =                  [:long_version, :branch, :sf_user, :sf_password].map{|key| $options[key]}
+    puts "upload_release(#{params.map{|param| param.inspect}.join","})"
+    upload_release(*params)
+    
   when "tag" # Tag the release, revert changes, and push to repository
     require_options($options, [:long_version, :branch, :upstream_remote, :release_commit])
     params =                  [:long_version, :branch, :upstream_remote, :release_commit].map{|key| $options[key]}
