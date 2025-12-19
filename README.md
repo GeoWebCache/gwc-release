@@ -1,10 +1,18 @@
+Requirements
+------------
+
+* Commit access to the https://github.com/GeoWebCache repo (team-geowebcache)
+* GitHub personal access token
+* repo.osgeo.org credentials (OSGeo login) with nexus permissions suitable for release: geoserver
+* SourceForge credentials
+
 # GWC release docker image
 
-The ruby script used below for the automated release of GeoWebCache, relied on an old setup that was difficult to reproduce.  This resulted in a small number of volunteers being able to release GWC, until Andrea created this docker image to ease the pain.
+The ruby script used below for the automated release of GeoWebCache, relied on an old setup that was difficult to reproduce.  This resulted in a small number of volunteers being able to release GWC, until Andrea created this docker image to ease the pain. Link to [the old installation instructions](https://github.com/GeoWebCache/gwc-release/blob/eb550e67974ca65b9a6cd0e69191c69b3bc6ae36/README.md#installation).
 
 ## Instructions for use
 
-Check out the `docker` branch from https://github.com/aaime/gwc-release/tree/docker and enter this directory.
+Check out the `master` branch from https://github.com/GeoWebCache/gwc-release and enter this directory.
 
 Build the image from the Dockerfile with:
 
@@ -20,88 +28,41 @@ Once started, one has to hand-edit the /root/.m2/settings.xml file to add the re
 
 Finally, in order to tag at the end, one needs to create a GitHub personal access token that will be used as the password for that step (go to your user settings, developer settings (right at the bottom, left), and create a personal access token). This could also be avoided by replacing with a step to copy over the identification certificate, and then checkout GWC using the ssh URL.
 
-### Now that docker is set up, you're ready to continue with the original GWC release instructions below (skipping Installation):
-
-This ruby script allows to automate the release of GeoWebCache.
-
-Requirements
-------------
-
-* Commit access to the https://github.com/GeoWebCache repo (team-geowebcache)
-* GitHub personal access token
-* repo.osgeo.org credentials (OSGeo login) with nexus permissions suitable for release: geoserver
-* SourceForge credentials
-
-Installation
-------------
-
-Script dependencies to install manually and put in the path:
-* GeoWebCache Build tools (Maven, Git, Java)
-* make
-* Sphinx
-* Ruby
-* xsddoc
-
-Once Ruby is installed the library dependencies can be installed by running:
-
-````
-gem install bundle
-bundle install
-````
-   
-Before starting a release
--------------------------
-
-If running on a non Windows platform after installing xsddoc:
-
-````
-dos2unix xsddoc
-````
-
-Copy the ``release.rb`` in the root of your GeoWebCache installation and make sure the "EDITOR" variable is set, e.g.
-
-````
-echo $EDITOR
-# if empty then
-export EDITOR=vi
-````
-
-Also make sure xsddoc in in the path.
-
-
 Releasing a stable release
 --------------------------
 
 First, manually check the GitHub commit history e.g. https://github.com/GeoWebCache/geowebcache/commits/2.0.x/ for the Improvements or Fixes to go into the Release notes.
 
-Assuming one wants to release a GWC 2.0.1, which depends on GeoToools 35.1, then run the following commands:
+Assuming one wants to release a GWC 2.0.1, which depends on GeoTools 35.1, then run the following commands:
 
 ````
 ruby release.rb --branch 2.0.x --long-version 2.0.1 --short-version 2.0 --gt-version 35.1 --type stable reset update 
 ruby release.rb --branch 2.0.x --long-version 2.0.1 --short-version 2.0 --gt-version 35.1 --type stable build
 ruby release.rb --branch 2.0.x --long-version 2.0.1 --short-version 2.0 --gt-version 35.1 --type stable deploy
 ruby release.rb --branch 2.0.x --long-version 2.0.1 --short-version 2.0 --gt-version 35.1 --type stable --sf-user jive upload
-ruby release.rb --branch 2.0.x --long-version 1.9.3 --short-version 2.0 --gt-version 35.1 --type stable --release-commit <versionCommitId> tag
+ruby release.rb --branch 2.0.x --long-version 2.0.1 --short-version 2.0 --gt-version 35.1 --type stable --release-commit <versionCommitId> tag
 ````
 
-Where ``versionCommitId`` is the commit automatically created by the update command, that switched all the pom files to release 2.0.1 (that needs to be tagged, and then reverted for the 2.0.x branch).
+Where ``versionCommitId`` is the commit automatically created by the update command (step 1), that switched all the pom files to release 2.0.1 (that needs to be tagged, and then reverted for the 2.0.x branch).
 
-Releasing a mainenance release
+Releasing a maintenance release
 ------------------------------
+
+(The only difference is `--type maintenance`)
 
 First, manually check the GitHub commit history e.g. https://github.com/GeoWebCache/geowebcache/commits/1.28.x/ for the Improvements or Fixes to go into the Release notes.
 
-Assuming one wants to release a GWC 1.28.1, which depends on GeoToools 34.1, then run the following commands:
+Assuming one wants to release a GWC 1.28.1, which depends on GeoTools 34.1, then run the following commands:
 
 ````
-ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type stable reset update 
-ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type stable build
-ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type stable deploy
-ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type stable --sf-user jive upload
-ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type stable --release-commit <versionCommitId> tag
+ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type maintenance reset update 
+ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type maintenance build
+ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type maintenance deploy
+ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type maintenance --sf-user jive upload
+ruby release.rb --branch 1.28.x --long-version 1.28.1 --short-version 1.28 --gt-version 34.1 --type maintenance --release-commit <versionCommitId> tag
 ````
 
-Where ``versionCommitId`` is the commit automatically created by the update command, that switched all the pom files to release 1.28.1 (that needs to be tagged, and then reverted for the 1.28.x branch).
+Where ``versionCommitId`` is the commit automatically created by the update command (step 1), that switched all the pom files to release 1.28.1 (that needs to be tagged, and then reverted for the 1.28.x branch).
 
 
 Creating a new branch
