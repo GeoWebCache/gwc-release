@@ -90,3 +90,7 @@ After releasing from the new branch, update the existing `main` branch to the ne
 ```
 ruby release.rb --branch main --long-version 2.2-SNAPSHOT --short-version 2.2 --gt-version 37-SNAPSHOT --type stable update
 ```
+
+# Create a GitHub release
+
+Finally, open https://github.com/GeoWebCache/geowebcache/tags and click Create Release, documenting all the changes
