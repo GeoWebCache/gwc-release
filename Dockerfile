@@ -17,10 +17,11 @@ RUN apt-get update && \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Maven 3.9.9
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.zip -O /tmp/maven.zip && \
+ARG MAVEN_VERSION=3.9.12
+# Install Maven
+RUN wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.zip -O /tmp/maven.zip && \
     unzip /tmp/maven.zip -d /opt && \
-    ln -s /opt/apache-maven-3.9.9 /opt/maven && \
+    ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
     ln -s /opt/maven/bin/mvn /usr/bin/mvn && \
     rm /tmp/maven.zip
 
