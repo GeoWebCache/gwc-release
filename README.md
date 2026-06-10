@@ -91,6 +91,8 @@ After releasing from the new branch, update the existing `main` branch to the ne
 ruby release.rb --branch main --long-version 2.2-SNAPSHOT --short-version 2.2 --gt-version 37-SNAPSHOT --type stable update
 ```
 
+**NB, same as GeoTools and GeoServer, in Jenkins you should archive the old maintenance jobs and duplicate the previous stable jobs and then update all the version numbers appropriately.**
+
 # Create a GitHub release
 
 Finally, open https://github.com/GeoWebCache/geowebcache/tags and click Create Release, documenting all the changes
