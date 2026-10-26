@@ -10,12 +10,6 @@ Requirements
 
 The ruby script used below for the automated release of GeoWebCache, relied on an old setup that was difficult to reproduce.  This resulted in a small number of volunteers being able to release GWC, until Andrea created this docker image to ease the pain. Link to [the old installation instructions](https://github.com/GeoWebCache/gwc-release/blob/eb550e67974ca65b9a6cd0e69191c69b3bc6ae36/README.md#installation).
 
-When running without docker on Java 9 or newer, xsddoc fails with ``NoClassDefFoundError: org/w3c/dom/ls/DocumentLS``. Replace the bundled Xerces as the ``Dockerfile`` does:
-
-````
-curl -o xsddoc-1.0/lib/xercesImpl.jar https://repo1.maven.org/maven2/xerces/xercesImpl/2.12.2/xercesImpl-2.12.2.jar
-````
-
 ## Instructions for use
 
 Check out the `master` branch from https://github.com/GeoWebCache/gwc-release and enter this directory.

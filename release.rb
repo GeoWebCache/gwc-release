@@ -16,23 +16,17 @@
 #
 
 #
-# Dependencies: GeoWebCache Build tools (Maven, Git, Java), make, Sphinx, Ruby, ruby-git, ruby-ssh, ruby-scp, xsddoc
+# Dependencies: GeoWebCache Build tools (Maven, Git, Java), make, Sphinx, Ruby, ruby-git, ruby-ssh, ruby-scp
 #
 # Install Ruby dependencies:
 #   gem install bundle
 #   bundle install
 # 
-# xsddoc:
-#   <http://sourceforge.net/projects/xframe/files/xsddoc/>
-#   Run 'dos2unix xsddoc' after downloading it if using a POSIX OS.  Place on the path or specifiy the location with --xsddoc-bin
-#   On Java 9+ replace lib/xercesImpl.jar with xercesImpl 2.12.2 (see README.md)
 #
    
 require 'git'
 require 'fileutils'
 require 'logger'
-require 'zip'
-require 'pathname'
 require 'net/ssh'
 require 'net/scp'
 require 'optparse'
@@ -101,7 +95,7 @@ def update_poms(gwc_version, gt_version)
 end
 
 def update_release(gwc_version)
-  Dir.glob (File.join($dir, "geowebcache","release","{src,doc}.xml")) do |path| 
+  Dir.glob (File.join($dir, "geowebcache","release","{src,doc,xsddoc}.xml")) do |path| 
     process_file path do |line|
       line.sub /<!-- GWC VERSION -->[^<]*<!-- \/GWC VERSION -->/, "<!-- GWC VERSION -->#{gwc_version}<!-- /GWC VERSION -->"
     end
@@ -218,13 +212,6 @@ def maven(*params)
   raise "Maven build failed" unless result
 end
 
-def xsddoc(*params)
-  args = [$options[:xsddoc_bin], *params]
-  $log.info args.join " "
-  result = system(*args)
-  raise "xsddoc build failed" unless result
-end
-
 def update_for_release(long_version, short_version, gt_version, branch, upstream_remote)
   $log.info "Updating build config to release version #{long_version} from #{branch}"
   mvn_gwc_version = "#{long_version}"
@@ -288,8 +275,6 @@ def build_release(long_version, branch)
 
   $git.checkout(branch)
 
-  artifact_version = "#{long_version}"
- 
   FileUtils.rm_rf $artifact_dir
   FileUtils.mkdir_p $artifact_dir
 
@@ -302,25 +287,6 @@ def build_release(long_version, branch)
   $log.info "Building Release Artifacts"
   maven("assembly:attached")
 
-  $log.info "Building Schema Documentation"
-  xsddoc_artifact_dir = File.join($artifact_dir, "geowebcache-#{artifact_version}")
-  xsddoc_dir = File.join(xsddoc_artifact_dir,"schema")
-  xsddoc_zip = File.join($artifact_dir, "geowebcache-#{artifact_version}-xsddoc.zip")
-  FileUtils.mkdir_p xsddoc_dir
-  xsddoc "-o", "#{xsddoc_dir}", "-t", "GeoWebCache #{artifact_version} Configuration Schema", "#{$config_xsd}"
-  raise "xsddoc produced no output in #{xsddoc_dir}" unless File.exist?(File.join(xsddoc_dir, "index.html"))
-  $log.info "Building zip file #{xsddoc_zip} from directory #{xsddoc_artifact_dir}"
-  Zip::File.open(xsddoc_zip, Zip::File::CREATE) do |zipfile|
-    Dir[File.join(xsddoc_dir, '**', '**')].each do |file|
-      path = Pathname.new(file)
-      relative_path = Pathname.new($artifact_dir)
-      $log.info "Adding #{$artifact_dir}"
-      
-      zipfile.add(path.relative_path_from(relative_path), file)
-    end
-  end
-  $log.info "Removing directory #{xsddoc_artifact_dir}"  
-  FileUtils.rm_rf xsddoc_artifact_dir
   $log.info "Done building release"
 end
 
@@ -458,7 +424,6 @@ $sf_password = nil
 $wedge_user = nil
 $wedge_password = nil
 
-$xsddoc_bin = nil
 $maven_bin = nil
 $make_bin = nil
 
@@ -522,10 +487,6 @@ OptionParser.new do |opts|
     raise "#{path} is not an executable" unless File.executable? path
     $cl_options[:make_bin] = path
   end
-  opts.on("--xsddoc-bin [PATH]", "Path of the xsddoc executable") do |path|
-    raise "#{path} is not an executable" unless File.executable? path
-    $cl_options[:xsddoc_bin] = path
-  end
   opts.on("--editor-bin [PATH]", "Path of the text editor to use to edit the release notes") do |path|
     raise "#{path} is not an executable" unless File.executable? path
     $cl_options[:editor_bin] = path
@@ -582,7 +543,6 @@ end.parse!
 $default_options = {
   :dir => Dir.pwd,
   :upstream_remote => "origin",
-  :xsddoc_bin => "xsddoc",
   :maven_bin => "mvn",
   :make_bin => "make", 
   :editor_bin => ENV["EDITOR"]
@@ -618,7 +578,6 @@ $dir = $options[:dir]
 $git = Git.open($options[:dir], :log => $git_log)
 
 $artifact_dir = File.join($options[:dir],"geowebcache","target", "release")
-$config_xsd = File.join($options[:dir], "geowebcache", "core","src","main","resources","org","geowebcache","config","geowebcache.xsd") 
 
 raise "Do not combine branch with other commands except reset" if ARGV.include? "branch" and not ARGV.all? {|command| ["branch", "reset"].include? command}
 
