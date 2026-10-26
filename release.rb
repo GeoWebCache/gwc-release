@@ -25,6 +25,7 @@
 # xsddoc:
 #   <http://sourceforge.net/projects/xframe/files/xsddoc/>
 #   Run 'dos2unix xsddoc' after downloading it if using a POSIX OS.  Place on the path or specifiy the location with --xsddoc-bin
+#   On Java 9+ replace lib/xercesImpl.jar with xercesImpl 2.12.2 (see README.md)
 #
    
 require 'git'
@@ -307,6 +308,7 @@ def build_release(long_version, branch)
   xsddoc_zip = File.join($artifact_dir, "geowebcache-#{artifact_version}-xsddoc.zip")
   FileUtils.mkdir_p xsddoc_dir
   xsddoc "-o", "#{xsddoc_dir}", "-t", "GeoWebCache #{artifact_version} Configuration Schema", "#{$config_xsd}"
+  raise "xsddoc produced no output in #{xsddoc_dir}" unless File.exist?(File.join(xsddoc_dir, "index.html"))
   $log.info "Building zip file #{xsddoc_zip} from directory #{xsddoc_artifact_dir}"
   Zip::File.open(xsddoc_zip, Zip::File::CREATE) do |zipfile|
     Dir[File.join(xsddoc_dir, '**', '**')].each do |file|
