@@ -36,19 +36,9 @@ COPY settings.xml /root/.m2/settings.xml
 RUN pip3 install --upgrade pip && \
     pip3 install --upgrade sphinx
 
-# Install XSDDoc (assuming the latest version is 0.11) and fix line endings
-RUN wget https://sourceforge.net/projects/xframe/files/xsddoc/xsddoc-1.0/xsddoc-1.0.zip/download -O /tmp/xsddoc.zip && \
-    unzip /tmp/xsddoc.zip -d /opt && \
-    dos2unix /opt/xsddoc-1.0/bin/xsddoc && \
-    chmod +x /opt/xsddoc-1.0/bin/xsddoc && \
-    rm /tmp/xsddoc.zip
-
-# Patch XSDDoc to run on Java 11
-RUN curl "https://repo1.maven.org/maven2/xerces/xercesImpl/2.12.2/xercesImpl-2.12.2.jar" -o /opt/xsddoc-1.0/lib/xercesImpl.jar
-
 # Set Java environment variables
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-ENV PATH=$JAVA_HOME/bin:/opt/xsddoc-1.0/bin:$PATH
+ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Clone the GeoWebCache repositories
 RUN git clone https://github.com/GeoWebCache/gwc-release.git /root/gwc-release
