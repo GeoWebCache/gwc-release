@@ -95,7 +95,7 @@ def update_poms(gwc_version, gt_version)
 end
 
 def update_release(gwc_version)
-  Dir.glob (File.join($dir, "geowebcache","release","{src,doc,xsddoc}.xml")) do |path| 
+  Dir.glob (File.join($dir, "geowebcache","release","{src,doc}.xml")) do |path| 
     process_file path do |line|
       line.sub /<!-- GWC VERSION -->[^<]*<!-- \/GWC VERSION -->/, "<!-- GWC VERSION -->#{gwc_version}<!-- /GWC VERSION -->"
     end
