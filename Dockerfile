@@ -11,15 +11,16 @@ RUN apt-get update && \
     git \
     wget \
     unzip \
-    openjdk-11-jdk \
+    openjdk-17-jdk \
     python3-pip \
     dos2unix \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-ARG MAVEN_VERSION=3.9.12
-# Install Maven
-RUN wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.zip -O /tmp/maven.zip && \
+ARG MAVEN_VERSION=3.9.16
+# Install Maven (try CDN first, fall back to archive for resilience)
+RUN (wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.zip -O /tmp/maven.zip || \
+    wget https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.zip -O /tmp/maven.zip) && \
     unzip /tmp/maven.zip -d /opt && \
     ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
     ln -s /opt/maven/bin/mvn /usr/bin/mvn && \
@@ -47,7 +48,7 @@ RUN wget https://sourceforge.net/projects/xframe/files/xsddoc/xsddoc-1.0/xsddoc-
 RUN curl "https://repo1.maven.org/maven2/xerces/xercesImpl/2.12.2/xercesImpl-2.12.2.jar" -o /opt/xsddoc-1.0/lib/xercesImpl.jar
 
 # Set Java environment variables
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH=$JAVA_HOME/bin:/opt/xsddoc-1.0/bin:$PATH
 
 # Clone the GeoWebCache repositories
