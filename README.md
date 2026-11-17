@@ -6,33 +6,33 @@ Requirements
 * repo.osgeo.org credentials (OSGeo login) with nexus permissions suitable for release: geoserver
 * SourceForge credentials
 
-# GWC release docker image
+Installation
+------------
 
-The ruby script used below for the automated release of GeoWebCache, relied on an old setup that was difficult to reproduce.  This resulted in a small number of volunteers being able to release GWC, until Andrea created this docker image to ease the pain. Link to [the old installation instructions](https://github.com/GeoWebCache/gwc-release/blob/eb550e67974ca65b9a6cd0e69191c69b3bc6ae36/README.md#installation).
+Install and put in the path:
 
-When running without docker on Java 9 or newer, xsddoc fails with ``NoClassDefFoundError: org/w3c/dom/ls/DocumentLS``. Replace the bundled Xerces as the ``Dockerfile`` does:
+* Git
+* Java 17
+* Maven
+* make and Sphinx
+* Ruby
+
+Install the Ruby dependencies from this directory:
 
 ````
-curl -o xsddoc-1.0/lib/xercesImpl.jar https://repo1.maven.org/maven2/xerces/xercesImpl/2.12.2/xercesImpl-2.12.2.jar
+gem install bundler
+bundle install
 ````
 
-## Instructions for use
+Add the repo.osgeo.org credentials to ``~/.m2/settings.xml`` (see ``settings.xml`` for the ``nexus`` server entry); geowebcache is deployed to the geoserver repository.
 
-Check out the `master` branch from https://github.com/GeoWebCache/gwc-release and enter this directory.
+Copy ``release.rb`` into the root of your GeoWebCache checkout and make sure ``EDITOR`` is set, e.g.
 
-Build the image from the Dockerfile with:
+````
+export EDITOR=vi
+````
 
-`docker build -t gwc_release:0.1 .`
-
-Run the image, passing in Git credentials as environment variables:
-
-`docker run -it -v d:/tmp/m2:/root/.m2 -e GIT_USERNAME="user" -e GIT_EMAIL="someone@somewhere.insummertime" gwc_release:0.1`
-
-Note that the maven repository /root/.m2 is mapped to the host's d:/tmp/m2 for persistence.
-
-Once started, one has to hand-edit the /root/.m2/settings.xml file to add the repo.osgeo.org credentials (OSGeo login, needs nexus permissions suitable for release: geoserver - geowebcache uses geoserver repo) (maybe we could make this also as part of the docker run command above?).
-
-Finally, in order to tag at the end, one needs to create a GitHub personal access token that will be used as the password for that step (go to your user settings, developer settings (right at the bottom, left), and create a personal access token). This could also be avoided by replacing with a step to copy over the identification certificate, and then checkout GWC using the ssh URL.
+To tag at the end, use a GitHub personal access token as the password, or check out GeoWebCache using the ssh URL.
 
 Releasing a stable release
 --------------------------
